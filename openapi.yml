@@ -1,0 +1,1500 @@
+openapi: 3.0.3
+info:
+  title: "Biblioteca El Búho Lector API"
+  description: "API para la gestión de la Biblioteca El Búho Lector, incluyendo catálogo de libros, usuarios y préstamos."
+  version: "1.0.0"
+  contact:
+    name: "Equipo de Desarrollo Búhoristeca"
+    email: "dev@buholector.com"
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Servidor de Desarrollo Local
+tags:
+  - name: Libros
+    description: "Operaciones sobre el catálogo de libros."
+  - name: Autores
+    description: "Operaciones para la gestión de autores." # Added based on common library needs
+  - name: Generos
+    description: "Operaciones para la gestión de géneros."
+  - name: Editoriales
+    description: "Operaciones para la gestión de editoriales."
+  - name: Idiomas
+    description: "Operaciones para la gestión de idiomas."
+  - name: Usuarios
+    description: "Operaciones sobre los usuarios de la biblioteca."
+  - name: RolesUsuario
+    description: "Operaciones para la gestión de roles de usuario."
+  - name: Prestamos
+    description: "Operaciones para la gestión de préstamos y devoluciones."
+  - name: Informes
+    description: "Generación de informes y estadísticas."
+
+paths:
+  # --- Gestión de Libros ---
+  /libros:
+    post:
+      tags:
+        - Libros
+      summary: "Dar de alta un nuevo libro"
+      description: "Registra un nuevo libro en el catálogo. El campo 'autor' en el DTO es un string; si se necesitaran múltiples autores gestionados como entidades, se requeriría una tabla 'Autores' y una tabla de unión 'Libro_Autor'."
+      operationId: crearLibro
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LibroRequest"
+      responses:
+        '201':
+          description: "Libro creado exitosamente."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LibroResponse"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+    get:
+      tags:
+        - Libros
+      summary: "Consultar libros del catálogo"
+      description: "Obtiene una lista de libros, con opciones de filtrado y paginación."
+      operationId: consultarLibros
+      parameters:
+        - name: titulo
+          in: query
+          description: "Filtrar por título (búsqueda parcial)"
+          required: false
+          schema:
+            type: string
+        - name: autor
+          in: query
+          description: "Filtrar por autor (búsqueda parcial)"
+          required: false
+          schema:
+            type: string
+        - name: idGenero
+          in: query
+          description: "Filtrar por ID de género"
+          required: false
+          schema:
+            type: integer
+        - name: isbn
+          in: query
+          description: "Filtrar por ISBN"
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: "Número de página (para paginación)"
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: "Tamaño de página (para paginación)"
+          required: false
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: "Lista de libros obtenida."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LibroResponse"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+
+  /libros/{idLibro}:
+    get:
+      tags:
+        - Libros
+      summary: "Consultar un libro por ID"
+      operationId: consultarLibroPorId
+      parameters:
+        - name: idLibro
+          in: path
+          required: true
+          description: "ID del libro a consultar."
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: "Información del libro."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LibroResponse"
+        '404':
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags:
+        - Libros
+      summary: "Modificar un libro existente"
+      operationId: modificarLibro
+      parameters:
+        - name: idLibro
+          in: path
+          required: true
+          description: "ID del libro a modificar."
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LibroRequest"
+      responses:
+        '200':
+          description: "Libro modificado exitosamente."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LibroResponse"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '404':
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags:
+        - Libros
+      summary: "Dar de baja lógica un libro"
+      operationId: bajaLogicaLibro
+      parameters:
+        - name: idLibro
+          in: path
+          required: true
+          description: "ID del libro a dar de baja."
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: "Libro dado de baja exitosamente."
+        '404':
+          $ref: "#/components/responses/NotFound"
+
+  /libros/{idLibro}/digital:
+    post:
+      tags:
+        - Libros
+      summary: "Cargar archivo PDF para un libro (Adicional Pro)"
+      operationId: cargarLibroDigital
+      parameters:
+        - name: idLibro
+          in: path
+          required: true
+          description: "ID del libro físico al que se asocia el PDF."
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                archivo:
+                  type: string
+                  format: binary
+                  description: "Archivo PDF del libro."
+      responses:
+        '200':
+          description: "Archivo PDF cargado y asociado exitosamente."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LibroResponse" # Devuelve el libro actualizado
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '404':
+          $ref: "#/components/responses/NotFound"
+    get:
+      tags:
+        - Libros
+      summary: "Recuperar archivo PDF de un libro (Adicional Pro)"
+      operationId: obtenerLibroDigital
+      parameters:
+        - name: idLibro
+          in: path
+          required: true
+          description: "ID del libro para obtener su versión digital."
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: "Archivo PDF del libro."
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: "Libro no encontrado o no tiene versión digital."
+
+  # --- Gestión de Autores (Asumiendo que 'autor' en LibroRequest es un string, estos endpoints serían para una gestión más avanzada) ---
+  # Si se implementa una entidad Autor separada y relación M-M con Libro:
+  # /autores:
+  #   post: ...
+  #   get: ...
+  # /autores/{idAutor}:
+  #   get: ...
+  #   put: ...
+  #   delete: ...
+
+  # --- Gestión de Géneros ---
+  /generos:
+    post:
+      tags:
+        - Generos
+      summary: "Crear un nuevo género"
+      operationId: crearGenero
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GeneroRequest"
+      responses:
+        '201':
+          description: "Género creado."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeneroResponse"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+    get:
+      tags:
+        - Generos
+      summary: "Listar todos los géneros"
+      operationId: listarGeneros
+      responses:
+        '200':
+          description: "Lista de géneros."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GeneroResponse"
+
+  /generos/{idGenero}:
+    get:
+      tags:
+        - Generos
+      summary: "Obtener un género por ID"
+      operationId: obtenerGeneroPorId
+      parameters:
+        - $ref: "#/components/parameters/IdGenero"
+      responses:
+        '200':
+          description: "Detalles del género."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeneroResponse"
+        '404':
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags:
+        - Generos
+      summary: "Actualizar un género"
+      operationId: actualizarGenero
+      parameters:
+        - $ref: "#/components/parameters/IdGenero"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GeneroRequest"
+      responses:
+        '200':
+          description: "Género actualizado."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeneroResponse"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '404':
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags:
+        - Generos
+      summary: "Eliminar un género"
+      description: "Considerar si se permite eliminar si está en uso por libros."
+      operationId: eliminarGenero
+      parameters:
+        - $ref: "#/components/parameters/IdGenero"
+      responses:
+        '204':
+          description: "Género eliminado."
+        '404':
+          $ref: "#/components/responses/NotFound"
+        '409': # Conflict
+          $ref: "#/components/responses/Conflict"
+
+
+  # --- Gestión de Editoriales ---
+  /editoriales:
+    post:
+      tags:
+        - Editoriales
+      summary: "Crear una nueva editorial"
+      operationId: crearEditorial
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EditorialRequest"
+      responses:
+        '201':
+          description: "Editorial creada."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EditorialResponse"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+    get:
+      tags:
+        - Editoriales
+      summary: "Listar todas las editoriales"
+      operationId: listarEditoriales
+      responses:
+        '200':
+          description: "Lista de editoriales."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EditorialResponse"
+
+  /editoriales/{idEditorial}:
+    get:
+      tags:
+        - Editoriales
+      summary: "Obtener una editorial por ID"
+      operationId: obtenerEditorialPorId
+      parameters:
+        - $ref: "#/components/parameters/IdEditorial"
+      responses:
+        '200':
+          description: "Detalles de la editorial."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EditorialResponse"
+        '404':
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags:
+        - Editoriales
+      summary: "Actualizar una editorial"
+      operationId: actualizarEditorial
+      parameters:
+        - $ref: "#/components/parameters/IdEditorial"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EditorialRequest"
+      responses:
+        '200':
+          description: "Editorial actualizada."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EditorialResponse"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '404':
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags:
+        - Editoriales
+      summary: "Eliminar una editorial"
+      operationId: eliminarEditorial
+      parameters:
+        - $ref: "#/components/parameters/IdEditorial"
+      responses:
+        '204':
+          description: "Editorial eliminada."
+        '404':
+          $ref: "#/components/responses/NotFound"
+        '409':
+          $ref: "#/components/responses/Conflict"
+
+
+  # --- Gestión de Idiomas ---
+  /idiomas:
+    post:
+      tags:
+        - Idiomas
+      summary: "Crear un nuevo idioma"
+      operationId: crearIdioma
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IdiomaRequest"
+      responses:
+        '201':
+          description: "Idioma creado."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdiomaResponse"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+    get:
+      tags:
+        - Idiomas
+      summary: "Listar todos los idiomas"
+      operationId: listarIdiomas
+      responses:
+        '200':
+          description: "Lista de idiomas."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/IdiomaResponse"
+
+  /idiomas/{idIdioma}:
+    get:
+      tags:
+        - Idiomas
+      summary: "Obtener un idioma por ID"
+      operationId: obtenerIdiomaPorId
+      parameters:
+        - $ref: "#/components/parameters/IdIdioma"
+      responses:
+        '200':
+          description: "Detalles del idioma."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdiomaResponse"
+        '404':
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags:
+        - Idiomas
+      summary: "Actualizar un idioma"
+      operationId: actualizarIdioma
+      parameters:
+        - $ref: "#/components/parameters/IdIdioma"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IdiomaRequest"
+      responses:
+        '200':
+          description: "Idioma actualizado."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdiomaResponse"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '404':
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags:
+        - Idiomas
+      summary: "Eliminar un idioma"
+      operationId: eliminarIdioma
+      parameters:
+        - $ref: "#/components/parameters/IdIdioma"
+      responses:
+        '204':
+          description: "Idioma eliminado."
+        '404':
+          $ref: "#/components/responses/NotFound"
+        '409':
+          $ref: "#/components/responses/Conflict"
+
+  # --- Gestión de Usuarios ---
+  /usuarios:
+    post:
+      tags:
+        - Usuarios
+      summary: "Registrar un nuevo usuario"
+      operationId: registrarUsuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UsuarioRequest"
+      responses:
+        '201':
+          description: "Usuario registrado exitosamente."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioResponse"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+    get:
+      tags:
+        - Usuarios
+      summary: "Consultar usuarios"
+      description: "Obtiene una lista de usuarios, con opciones de filtrado."
+      operationId: consultarUsuarios
+      parameters:
+        - name: dni
+          in: query
+          description: "Filtrar por DNI"
+          required: false
+          schema:
+            type: string
+        - name: email
+          in: query
+          description: "Filtrar por correo electrónico"
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: "Número de página"
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: "Tamaño de página"
+          required: false
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: "Lista de usuarios."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UsuarioResponse"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+
+  /usuarios/{idUsuario}:
+    get:
+      tags:
+        - Usuarios
+      summary: "Consultar un usuario por ID"
+      operationId: consultarUsuarioPorId
+      parameters:
+        - $ref: "#/components/parameters/IdUsuario"
+      responses:
+        '200':
+          description: "Información del usuario."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioResponse"
+        '404':
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags:
+        - Usuarios
+      summary: "Modificar datos de un usuario"
+      operationId: modificarUsuario
+      parameters:
+        - $ref: "#/components/parameters/IdUsuario"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UsuarioRequest"
+      responses:
+        '200':
+          description: "Usuario modificado exitosamente."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioResponse"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '404':
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags:
+        - Usuarios
+      summary: "Dar de baja lógica un usuario"
+      operationId: bajaLogicaUsuario
+      parameters:
+        - $ref: "#/components/parameters/IdUsuario"
+      responses:
+        '204':
+          description: "Usuario dado de baja exitosamente."
+        '404':
+          $ref: "#/components/responses/NotFound"
+
+  # --- Gestión de Roles de Usuario ---
+  /roles-usuario:
+    post:
+      tags:
+        - RolesUsuario
+      summary: "Crear un nuevo rol de usuario"
+      operationId: crearRolUsuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RolUsuarioRequest"
+      responses:
+        '201':
+          description: "Rol creado."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RolUsuarioResponse"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+    get:
+      tags:
+        - RolesUsuario
+      summary: "Listar todos los roles de usuario"
+      operationId: listarRolesUsuario
+      responses:
+        '200':
+          description: "Lista de roles."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RolUsuarioResponse"
+
+  /roles-usuario/{idRolUsuario}:
+    get:
+      tags:
+        - RolesUsuario
+      summary: "Obtener un rol de usuario por ID"
+      operationId: obtenerRolUsuarioPorId
+      parameters:
+        - $ref: "#/components/parameters/IdRolUsuario"
+      responses:
+        '200':
+          description: "Detalles del rol."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RolUsuarioResponse"
+        '404':
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags:
+        - RolesUsuario
+      summary: "Actualizar un rol de usuario"
+      operationId: actualizarRolUsuario
+      parameters:
+        - $ref: "#/components/parameters/IdRolUsuario"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RolUsuarioRequest"
+      responses:
+        '200':
+          description: "Rol actualizado."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RolUsuarioResponse"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '404':
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags:
+        - RolesUsuario
+      summary: "Eliminar un rol de usuario"
+      operationId: eliminarRolUsuario
+      parameters:
+        - $ref: "#/components/parameters/IdRolUsuario"
+      responses:
+        '204':
+          description: "Rol eliminado."
+        '404':
+          $ref: "#/components/responses/NotFound"
+        '409':
+          $ref: "#/components/responses/Conflict"
+
+
+  # --- Gestión de Préstamos ---
+  /prestamos:
+    post:
+      tags:
+        - Prestamos
+      summary: "Registrar un nuevo préstamo"
+      description: "Verifica disponibilidad del libro y estado del usuario (sin préstamos vencidos)."
+      operationId: registrarPrestamo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PrestamoRequest"
+      responses:
+        '201':
+          description: "Préstamo registrado exitosamente."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrestamoResponse"
+        '400': # También para validaciones de negocio como "libro no disponible", "usuario con prestamos vencidos"
+          $ref: "#/components/responses/BadRequest"
+        '404':
+          description: "Libro o Usuario no encontrado."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        '409': # Conflict / Business rule violation
+          description: "Conflicto de negocio (ej: Usuario con préstamos vencidos, Libro no disponible)."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    get:
+      tags:
+        - Prestamos
+      summary: "Listar todos los préstamos (Admin)"
+      description: "Permite filtrar por estado, usuario, libro, fechas."
+      operationId: listarTodosPrestamos
+      parameters:
+        - name: idUsuario
+          in: query
+          schema:
+            type: integer
+        - name: idLibro
+          in: query
+          schema:
+            type: integer
+        - name: estadoPrestamo
+          in: query
+          schema:
+            $ref: "#/components/schemas/EstadoPrestamo"
+        - name: fechaDesde
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: fechaHasta
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: "Lista de préstamos."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PrestamoResponse"
+
+  /prestamos/{idPrestamo}/devolver:
+    put: # o POST si se prefiere para acciones
+      tags:
+        - Prestamos
+      summary: "Registrar la devolución de un libro"
+      operationId: registrarDevolucion
+      parameters:
+        - name: idPrestamo
+          in: path
+          required: true
+          description: "ID del préstamo a marcar como devuelto."
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: "Devolución registrada exitosamente."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrestamoResponse"
+        '404':
+          $ref: "#/components/responses/NotFound"
+        '409':
+          description: "El libro ya fue devuelto o el préstamo no existe en estado prestado."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /usuarios/{idUsuario}/prestamos:
+    get:
+      tags:
+        - Prestamos
+        - Usuarios
+      summary: "Consultar los préstamos activos de un usuario"
+      operationId: consultarPrestamosPorUsuario
+      parameters:
+        - $ref: "#/components/parameters/IdUsuario"
+        - name: soloActivos
+          in: query
+          description: "Si es true, devuelve solo préstamos no devueltos (PRESTADO, VENCIDO)."
+          required: false
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: "Lista de préstamos del usuario."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PrestamoResponse"
+        '404':
+          $ref: "#/components/responses/NotFound" # Usuario no encontrado
+
+
+  # --- Informes ---
+  /informes/prestamos-por-tipo-usuario:
+    get:
+      tags:
+        - Informes
+      summary: "Reporte de libros prestados según tipo de usuario"
+      operationId: reportePrestamosPorTipoUsuario
+      parameters:
+        - name: idRolUsuario
+          in: query
+          description: "ID del rol de usuario para filtrar (opcional)."
+          required: false
+          schema:
+            type: integer
+        - name: fechaDesde
+          in: query
+          description: "Fecha de inicio del período del informe (YYYY-MM-DD)."
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: fechaHasta
+          in: query
+          description: "Fecha de fin del período del informe (YYYY-MM-DD)."
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: "Resultado del informe."
+          content:
+            application/json:
+              schema:
+                # Definir un esquema específico para este informe o usar una lista genérica
+                type: array
+                items:
+                  $ref: "#/components/schemas/PrestamoResponse" # O un DTO específico de informe
+        '400':
+          $ref: "#/components/responses/BadRequest"
+
+  /informes/disponibilidad-catalogo:
+    get:
+      tags:
+        - Informes
+      summary: "Reporte de disponibilidad del catálogo"
+      description: "Muestra cuántos ejemplares hay de cada libro y cuántos están disponibles."
+      operationId: reporteDisponibilidadCatalogo
+      parameters:
+        - name: idLibro
+          in: query
+          description: "ID de un libro específico para consultar su disponibilidad (opcional)."
+          required: false
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: "Disponibilidad del catálogo."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InformeDisponibilidadLibro"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+
+  /informes/libros-menos-prestados:
+    get:
+      tags:
+        - Informes
+      summary: "Identificar libros menos prestados"
+      description: "Libros que no tuvieron préstamos o ninguna rotación en un período."
+      operationId: reporteLibrosMenosPrestados
+      parameters:
+        - name: fechaDesde
+          in: query
+          description: "Fecha de inicio del período (YYYY-MM-DD)."
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: fechaHasta
+          in: query
+          description: "Fecha de fin del período (YYYY-MM-DD)."
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: "Lista de libros menos prestados."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LibroResponse" # O un DTO más simple
+        '400':
+          $ref: "#/components/responses/BadRequest"
+
+  /informes/prestamos-vencidos:
+    get:
+      tags:
+        - Informes
+      summary: "Reporte de préstamos vencidos"
+      operationId: reportePrestamosVencidos
+      responses:
+        '200':
+          description: "Lista de préstamos vencidos."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PrestamoResponse"
+
+  /informes/sugerencia-popularidad-generos:
+    get:
+      tags:
+        - Informes
+      summary: "Informe Sugerido: Popularidad de Géneros"
+      description: "Este es un informe sugerido para analizar qué géneros son los más prestados en un período determinado."
+      operationId: reportePopularidadGeneros
+      parameters:
+        - name: fechaDesde
+          in: query
+          description: "Fecha de inicio del período (YYYY-MM-DD)."
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: fechaHasta
+          in: query
+          description: "Fecha de fin del período (YYYY-MM-DD)."
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: "Resultado del informe de popularidad de géneros."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object # Definir un DTO específico para este informe
+                  properties:
+                    genero:
+                      $ref: "#/components/schemas/GeneroResponse"
+                    totalPrestamos:
+                      type: integer
+
+
+components:
+  schemas:
+    # --- Schemas para Libros ---
+    LibroRequest:
+      type: object
+      required:
+        - titulo
+        - idEditorial
+        - idIdioma
+        - isbn
+        - cantidadEjemplares
+        - generoIds # Asumiendo que se envían los IDs de los géneros
+      properties:
+        titulo:
+          type: string
+          maxLength: 255
+          example: "El Señor de los Anillos"
+        autor: # Como está en el DER, un solo campo. Para múltiples autores, sería List<String> o List<AutorId>
+          type: string
+          maxLength: 255
+          example: "J.R.R. Tolkien"
+        descripcion:
+          type: string
+          example: "Una épica aventura en la Tierra Media..."
+        fechaPublicacion:
+          type: string
+          format: date
+          example: "1954-07-29"
+        idEditorial:
+          type: integer
+          format: int64
+          example: 1
+        idIdioma:
+          type: integer
+          format: int64
+          example: 1
+        generoIds: # Para la relación Libro_Genero
+          type: array
+          items:
+            type: integer
+            format: int64
+          example: [1, 2]
+        isbn:
+          type: string
+          maxLength: 20
+          example: "978-0618260274"
+        cantidadEjemplares:
+          type: integer
+          minimum: 0
+          example: 5
+        rutaPdf:
+          type: string
+          nullable: true
+          description: "Ruta al archivo PDF (para libros digitales, opcional)."
+          example: "/files/libro_101.pdf"
+
+    LibroResponse:
+      allOf:
+        - $ref: "#/components/schemas/LibroBase"
+        - type: object
+          properties:
+            idLibro:
+              type: integer
+              format: int64
+              readOnly: true
+              example: 101
+            editorial: # Objeto anidado en la respuesta
+              $ref: "#/components/schemas/EditorialResponse"
+            idioma: # Objeto anidado en la respuesta
+              $ref: "#/components/schemas/IdiomaResponse"
+            generos: # Lista de objetos Género en la respuesta
+              type: array
+              items:
+                $ref: "#/components/schemas/GeneroResponse"
+            activo:
+              type: boolean
+              readOnly: true
+            tieneDigital:
+              type: boolean
+              readOnly: true
+              description: "Indica si el libro tiene una versión digital disponible."
+
+    LibroBase: # Atributos comunes para Request y Response (parcial)
+      type: object
+      properties:
+        titulo:
+          type: string
+          example: "El Señor de los Anillos"
+        autor:
+          type: string
+          example: "J.R.R. Tolkien"
+        descripcion:
+          type: string
+        fechaPublicacion:
+          type: string
+          format: date
+        isbn:
+          type: string
+        cantidadEjemplares:
+          type: integer
+        rutaPdf:
+          type: string
+          nullable: true
+
+    LibroSummaryResponse: # Para embeber en Préstamos
+      type: object
+      properties:
+        idLibro:
+          type: integer
+          format: int64
+        titulo:
+          type: string
+        autor:
+          type: string
+        isbn:
+          type: string
+
+    # --- Schemas para Generos ---
+    GeneroRequest:
+      type: object
+      required:
+        - nombreGenero
+      properties:
+        nombreGenero:
+          type: string
+          maxLength: 100
+          example: "Ciencia Ficción"
+    GeneroResponse:
+      allOf:
+        - $ref: "#/components/schemas/GeneroRequest"
+        - type: object
+          properties:
+            idGenero:
+              type: integer
+              format: int64
+              readOnly: true
+              example: 1
+
+    # --- Schemas para Editoriales ---
+    EditorialRequest:
+      type: object
+      required:
+        - nombreEditorial
+      properties:
+        nombreEditorial:
+          type: string
+          maxLength: 150
+          example: "Minotauro"
+    EditorialResponse:
+      allOf:
+        - $ref: "#/components/schemas/EditorialRequest"
+        - type: object
+          properties:
+            idEditorial:
+              type: integer
+              format: int64
+              readOnly: true
+              example: 1
+
+    # --- Schemas para Idiomas ---
+    IdiomaRequest:
+      type: object
+      required:
+        - nombreIdioma
+      properties:
+        nombreIdioma:
+          type: string
+          maxLength: 50
+          example: "Español"
+    IdiomaResponse:
+      allOf:
+        - $ref: "#/components/schemas/IdiomaRequest"
+        - type: object
+          properties:
+            idIdioma:
+              type: integer
+              format: int64
+              readOnly: true
+              example: 1
+
+    # --- Schemas para Usuarios ---
+    UsuarioRequest:
+      type: object
+      required:
+        - nombre
+        - apellido
+        - dni
+        - correoElectronico
+        - idRolUsuario
+      properties:
+        nombre:
+          type: string
+          maxLength: 100
+        apellido:
+          type: string
+          maxLength: 100
+        dni:
+          type: string
+          maxLength: 20
+          # pattern: # Añadir patrón de DNI si es necesario
+        fechaNacimiento:
+          type: string
+          format: date
+        direccion:
+          type: string
+          maxLength: 255
+        correoElectronico:
+          type: string
+          format: email
+          maxLength: 150
+        idRolUsuario:
+          type: integer
+          format: int64
+
+    UsuarioResponse:
+      allOf:
+        - $ref: "#/components/schemas/UsuarioBase"
+        - type: object
+          properties:
+            idUsuario:
+              type: integer
+              format: int64
+              readOnly: true
+            rolUsuario: # Objeto anidado
+              $ref: "#/components/schemas/RolUsuarioResponse"
+            activo:
+              type: boolean
+              readOnly: true
+
+    UsuarioBase: # Común para Request y Response (parcial)
+      type: object
+      properties:
+        nombre:
+          type: string
+        apellido:
+          type: string
+        dni:
+          type: string
+        fechaNacimiento:
+          type: string
+          format: date
+        direccion:
+          type: string
+        correoElectronico:
+          type: string
+          format: email
+
+    UsuarioSummaryResponse: # Para embeber en Préstamos
+      type: object
+      properties:
+        idUsuario:
+          type: integer
+          format: int64
+        nombre:
+          type: string
+        apellido:
+          type: string
+        dni:
+          type: string
+        correoElectronico:
+          type: string
+
+
+    # --- Schemas para Roles de Usuario ---
+    RolUsuarioRequest:
+      type: object
+      required:
+        - nombreRol
+      properties:
+        nombreRol:
+          type: string
+          maxLength: 50
+          example: "Estudiante"
+    RolUsuarioResponse:
+      allOf:
+        - $ref: "#/components/schemas/RolUsuarioRequest"
+        - type: object
+          properties:
+            idRolUsuario:
+              type: integer
+              format: int64
+              readOnly: true
+              example: 1
+
+    # --- Schemas para Préstamos ---
+    PrestamoRequest:
+      type: object
+      required:
+        - idLibro
+        - idUsuario
+      properties:
+        idLibro:
+          type: integer
+          format: int64
+        idUsuario:
+          type: integer
+          format: int64
+        plazoPrestamoDias: # Para anular el por defecto
+          type: integer
+          minimum: 1
+          nullable: true
+          example: 7 # Si se quiere un plazo diferente al de 14 días por defecto
+
+    PrestamoResponse:
+      type: object
+      properties:
+        idPrestamo:
+          type: integer
+          format: int64
+          readOnly: true
+        libro: # Usar un DTO resumido del libro
+          $ref: "#/components/schemas/LibroSummaryResponse"
+        usuario: # Usar un DTO resumido del usuario
+          $ref: "#/components/schemas/UsuarioSummaryResponse"
+        fechaPrestamo:
+          type: string
+          format: date-time
+          readOnly: true
+        fechaDevolucionEsperada:
+          type: string
+          format: date
+          readOnly: true
+        fechaDevolucionReal:
+          type: string
+          format: date
+          nullable: true
+          readOnly: true
+        estadoPrestamo:
+          $ref: "#/components/schemas/EstadoPrestamo"
+
+    EstadoPrestamo:
+      type: string
+      enum: [PRESTADO, DEVUELTO, VENCIDO]
+      example: "PRESTADO"
+
+    # --- Schemas para Informes ---
+    InformeDisponibilidadLibro:
+      type: object
+      properties:
+        libro:
+          $ref: "#/components/schemas/LibroSummaryResponse"
+        cantidadTotal:
+          type: integer
+        cantidadDisponible:
+          type: integer
+        cantidadPrestados:
+          type: integer
+
+    # --- Error Handling ---
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        fieldErrors:
+          type: array
+          nullable: true
+          items:
+            $ref: "#/components/schemas/FieldError"
+    FieldError:
+      type: object
+      properties:
+        objectName:
+          type: string
+        field:
+          type: string
+        message:
+          type: string
+
+  parameters:
+    IdLibro:
+      name: idLibro
+      in: path
+      required: true
+      description: "ID del Libro"
+      schema:
+        type: integer
+        format: int64
+    IdGenero:
+      name: idGenero
+      in: path
+      required: true
+      description: "ID del Género"
+      schema:
+        type: integer
+        format: int64
+    IdEditorial:
+      name: idEditorial
+      in: path
+      required: true
+      description: "ID de la Editorial"
+      schema:
+        type: integer
+        format: int64
+    IdIdioma:
+      name: idIdioma
+      in: path
+      required: true
+      description: "ID del Idioma"
+      schema:
+        type: integer
+        format: int64
+    IdUsuario:
+      name: idUsuario
+      in: path
+      required: true
+      description: "ID del Usuario"
+      schema:
+        type: integer
+        format: int64
+    IdRolUsuario:
+      name: idRolUsuario
+      in: path
+      required: true
+      description: "ID del Rol de Usuario"
+      schema:
+        type: integer
+        format: int64
+
+  responses:
+    BadRequest:
+      description: "Solicitud incorrecta debido a datos inválidos (ej: validación fallida)."
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: "El recurso solicitado no fue encontrado."
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Conflict:
+      description: "Conflicto. La solicitud no se pudo procesar debido a un conflicto con el estado actual del recurso (ej: recurso referenciado en uso)."
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Unauthorized:
+      description: "No autorizado. Requiere autenticación."
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    InternalServerError:
+      description: "Error interno del servidor."
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
