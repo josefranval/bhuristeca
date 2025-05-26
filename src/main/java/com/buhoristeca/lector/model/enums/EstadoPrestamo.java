@@ -1,4 +1,4 @@
-package com.buhoristeca.lector.model;
+package com.buhoristeca.lector.model.enums;
 
 public enum EstadoPrestamo {
     PRESTADO,

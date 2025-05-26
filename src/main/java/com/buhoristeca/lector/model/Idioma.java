@@ -21,7 +21,4 @@ public class Idioma {
     @Column(name = "nombre_idioma", nullable = false, length = 50, unique = true)
     private String nombreIdioma;
 
-    // Optional: inverse side for Libros ManyToOne
-    // @OneToMany(mappedBy = "idioma")
-    // private Set<Libro> libros;
 }

@@ -1,5 +1,6 @@
 package com.buhoristeca.lector.model;
 
+import com.buhoristeca.lector.model.enums.EstadoPrestamo;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
