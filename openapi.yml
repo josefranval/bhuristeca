@@ -4,8 +4,8 @@ info:
   description: "API para la gestión de la Biblioteca El Búho Lector, incluyendo catálogo de libros, usuarios y préstamos."
   version: "1.0.0"
   contact:
-    name: "Equipo de Desarrollo Búhoristeca"
-    email: "dev@buholector.com"
+    name: "jose v"
+    email: "test@test.com"
 servers:
   - url: http://localhost:8080/api/v1
     description: Servidor de Desarrollo Local
@@ -13,7 +13,7 @@ tags:
   - name: Libros
     description: "Operaciones sobre el catálogo de libros."
   - name: Autores
-    description: "Operaciones para la gestión de autores." # Added based on common library needs
+    description: "Operaciones para la gestión de autores."
   - name: Generos
     description: "Operaciones para la gestión de géneros."
   - name: Editoriales
@@ -30,7 +30,6 @@ tags:
     description: "Generación de informes y estadísticas."
 
 paths:
-  # --- Gestión de Libros ---
   /libros:
     post:
       tags:
@@ -242,17 +241,6 @@ paths:
         '404':
           description: "Libro no encontrado o no tiene versión digital."
 
-  # --- Gestión de Autores (Asumiendo que 'autor' en LibroRequest es un string, estos endpoints serían para una gestión más avanzada) ---
-  # Si se implementa una entidad Autor separada y relación M-M con Libro:
-  # /autores:
-  #   post: ...
-  #   get: ...
-  # /autores/{idAutor}:
-  #   get: ...
-  #   put: ...
-  #   delete: ...
-
-  # --- Gestión de Géneros ---
   /generos:
     post:
       tags:
@@ -1055,7 +1043,7 @@ components:
           type: string
           maxLength: 255
           example: "El Señor de los Anillos"
-        autor: # Como está en el DER, un solo campo. Para múltiples autores, sería List<String> o List<AutorId>
+        autor: # Como esta en el DER, un solo campo. Para múltiples autores, sería List<String> o List<AutorId>
           type: string
           maxLength: 255
           example: "J.R.R. Tolkien"
