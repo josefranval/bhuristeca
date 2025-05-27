@@ -41,6 +41,12 @@ Test run
 mvn clean test
 ```
 
+# Collection postman en src/main/resources
+```shell
+Buhoristeca API v1.postman_collection.json
+```
+
+
 ## DER
 ![img.png](img.png)
 

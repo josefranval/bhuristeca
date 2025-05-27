@@ -1,0 +1,534 @@
+{
+	"info": {
+		"_postman_id": "a9532fe2-0c41-43ac-a5d4-84bfbe384509",
+		"name": "Buhoristeca API v1",
+		"description": "Colección de Postman para la API de la Biblioteca El Búho Lector",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "13793487",
+		"_collection_link": "https://planetary-flare-618262.postman.co/workspace/ICBC~63b512db-43aa-420a-85b7-f442dc816876/collection/13793487-a9532fe2-0c41-43ac-a5d4-84bfbe384509?action=share&source=collection_link&creator=13793487"
+	},
+	"item": [
+		{
+			"name": "Editoriales",
+			"item": [
+				{
+					"name": "Crear Editorial",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombreEditorial\": \"Editorial Planeta V3\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/editoriales",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"editoriales"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Editoriales",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/editoriales",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"editoriales"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Editorial por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/editoriales/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"editoriales",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Generos",
+			"item": [
+				{
+					"name": "Crear Genero",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombreGenero\": \"Ciencia Ficción V3\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/generos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"generos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Generos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/generos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"generos"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Idiomas",
+			"item": [
+				{
+					"name": "Crear Idioma",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombreIdioma\": \"Inglés V3\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/idiomas",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"idiomas"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "RolesUsuario",
+			"item": [
+				{
+					"name": "Crear Rol Usuario",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombreRol\": \"ADMINISTRADOR_V3\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/roles-usuario",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"roles-usuario"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Libros",
+			"item": [
+				{
+					"name": "Crear Libro",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"titulo\": \"Duna V3\",\n  \"autor\": \"Frank Herbert\",\n  \"descripcion\": \"Una épica novela de ciencia ficción.\",\n  \"fechaPublicacion\": \"1965-08-01\",\n  \"idEditorial\": 1,\n  \"idIdioma\": 1,\n  \"generoIds\": [\n    1\n  ],\n  \"isbn\": \"978-0441172719\",\n  \"cantidadEjemplares\": 5,\n  \"rutaPdf\": null\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/libros",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"libros"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar Libros",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/libros",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"libros"
+							],
+							"query": [
+								{
+									"key": "titulo",
+									"value": "Duna",
+									"disabled": true
+								},
+								{
+									"key": "autor",
+									"value": "Herbert",
+									"disabled": true
+								},
+								{
+									"key": "idGenero",
+									"value": "1",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cargar PDF a Libro",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "archivo",
+									"type": "file",
+									"src": "/C:/path/to/your/dummy.pdf"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/libros/1/digital",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"libros",
+								"1",
+								"digital"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Usuarios",
+			"item": [
+				{
+					"name": "Registrar Usuario",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Lector\",\n  \"apellido\": \"Compulsivo V3\",\n  \"dni\": \"99888777Z\",\n  \"fechaNacimiento\": \"1985-07-20\",\n  \"direccion\": \"Avenida Siempre Viva 742\",\n  \"correoElectronico\": \"lector.v3@example.com\",\n  \"idRolUsuario\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/usuarios",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"usuarios"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar Usuarios",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/usuarios",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"usuarios"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Prestamos",
+			"item": [
+				{
+					"name": "Registrar Préstamo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"idLibro\": 1,\n  \"idUsuario\": 1,\n  \"plazoPrestamoDias\": 10\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/prestamos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"prestamos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Registrar Devolución",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/prestamos/1/devolver",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"prestamos",
+								"1",
+								"devolver"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Todos los Préstamos (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/prestamos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"prestamos"
+							],
+							"query": [
+								{
+									"key": "idUsuario",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "idLibro",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "estadoPrestamo",
+									"value": "PRESTADO",
+									"disabled": true
+								},
+								{
+									"key": "fechaDesde",
+									"value": "2024-01-01",
+									"disabled": true
+								},
+								{
+									"key": "fechaHasta",
+									"value": "2024-12-31",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Informes",
+			"item": [
+				{
+					"name": "Disponibilidad Catálogo (Todos)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/informes/disponibilidad-catalogo",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"informes",
+								"disponibilidad-catalogo"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Disponibilidad Catálogo (Por ID Libro)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/informes/disponibilidad-catalogo?idLibro=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"informes",
+								"disponibilidad-catalogo"
+							],
+							"query": [
+								{
+									"key": "idLibro",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Libros Menos Prestados",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/informes/libros-menos-prestados?fechaDesde=2024-01-01&fechaHasta=2024-12-31",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"informes",
+								"libros-menos-prestados"
+							],
+							"query": [
+								{
+									"key": "fechaDesde",
+									"value": "2024-01-01"
+								},
+								{
+									"key": "fechaHasta",
+									"value": "2024-12-31"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Popularidad de Géneros",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/informes/sugerencia-popularidad-generos?fechaDesde=2024-01-01&fechaHasta=2024-05-25",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"informes",
+								"sugerencia-popularidad-generos"
+							],
+							"query": [
+								{
+									"key": "fechaDesde",
+									"value": "2024-01-01"
+								},
+								{
+									"key": "fechaHasta",
+									"value": "2024-05-25"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080/api/v1",
+			"type": "string"
+		}
+	]
+}
